@@ -53,4 +53,10 @@ func TestPageTitles(t *testing.T) {
 	for _, title := range pageTitleTestTitles {
 		assert.Contains(t, titles, title)
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*1)
+	defer cancel()
+	titles, err = client.PageTitles(ctx, pageTitlesTestDBName, pageTitlesTestDate)
+	assert.Contains(t, err.Error(), context.DeadlineExceeded.Error())
+	assert.Equal(t, 0, len(titles))
 }

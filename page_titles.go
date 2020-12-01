@@ -14,7 +14,7 @@ import (
 // PageTitles get list of page titles for project
 func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time) ([]string, error) {
 	url := cl.url + cl.options.PageTitlesURL + "/" + date.Format(dateFormat) + "/" + dbName + "-" + date.Format(dateFormat) + "-all-titles-in-ns-0.gz"
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 	if err != nil {
 		return []string{}, err
