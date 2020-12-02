@@ -9,7 +9,7 @@ func NewBuilder() *ClientBuilder {
 	}
 }
 
-// ClientBuilder is builder for main client
+// ClientBuilder is a builder for main client configuration
 type ClientBuilder struct {
 	client *Client
 }
@@ -20,13 +20,13 @@ func (cb *ClientBuilder) URL(url string) *ClientBuilder {
 	return cb
 }
 
-// HTTPClient setup your own http client
+// HTTPClient pass your own http client
 func (cb *ClientBuilder) HTTPClient(httpClient *http.Client) *ClientBuilder {
 	cb.client.httpClient = httpClient
 	return cb
 }
 
-// Options update client builder default options
+// Options update default options for client
 func (cb *ClientBuilder) Options(options *Options) *ClientBuilder {
 	cb.client.options = options
 	return cb
