@@ -17,7 +17,7 @@ client := dumps.NewBuilder().
 		URL("http://new-url.com").
 		HTTPClient(&http.Client{}).
 		Options(&dumps.Options{}).
-    Build()
+		Build()
 
 titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC())
 
