@@ -7,8 +7,8 @@ import (
 const dumpsURL = "https://dumps.wikimedia.org/"
 const dateFormat = "20060102"
 
-// NewCLient create new dumps client
-func NewCLient() *Client {
+// NewClient create new dumps client
+func NewClient() *Client {
 	return &Client{
 		dumpsURL,
 		new(http.Client),

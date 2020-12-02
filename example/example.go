@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	client := dumps.NewCLient()
+	client := dumps.NewClient()
 
 	titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC())
 

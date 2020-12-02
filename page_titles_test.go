@@ -42,7 +42,7 @@ func TestPageTitles(t *testing.T) {
 	srv := httptest.NewServer(createClientTestServer())
 	defer srv.Close()
 
-	client := NewCLient()
+	client := NewClient()
 	client.url = srv.URL
 	client.options.PageTitlesURL = pageTitlesTestURL
 

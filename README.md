@@ -11,4 +11,17 @@ titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().
 fmt.Println(titles, err)
 ```
 
+If you need to change the default configuration you can use client builder:
+```go
+client := dumps.NewBuilder().
+		URL("http://new-url.com").
+		HTTPClient(&http.Client{}).
+		Options(&dumps.Options{}).
+		Build()
+
+titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC())
+
+fmt.Println(titles, err)
+```
+
 ### Note that for big projects you might need lots of ram to keep the data in memory.

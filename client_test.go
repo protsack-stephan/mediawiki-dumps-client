@@ -7,7 +7,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	client := NewCLient()
+	client := NewClient()
 	assert.NotNil(t, client)
 	assert.NotNil(t, client.httpClient)
 	assert.NotNil(t, client.options)
