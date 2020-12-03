@@ -53,10 +53,19 @@ func TestPageTitles(t *testing.T) {
 	for _, title := range pageTitleTestTitles {
 		assert.Contains(t, titles, title)
 	}
+}
+
+func TestPageTitleError(t *testing.T) {
+	srv := httptest.NewServer(createClientTestServer())
+	defer srv.Close()
+
+	client := NewClient()
+	client.url = srv.URL
+	client.options.PageTitlesURL = pageTitlesTestURL
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*1)
 	defer cancel()
-	titles, err = client.PageTitles(ctx, pageTitlesTestDBName, pageTitlesTestDate)
+	titles, err := client.PageTitles(ctx, pageTitlesTestDBName, pageTitlesTestDate)
 	assert.Contains(t, err.Error(), context.DeadlineExceeded.Error())
 	assert.Equal(t, 0, len(titles))
 }
