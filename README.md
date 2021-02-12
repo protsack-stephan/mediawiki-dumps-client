@@ -24,4 +24,4 @@ titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().
 fmt.Println(titles, err)
 ```
 
-### Note that for big projects you might need lots of ram to keep the data in memory.
+### Note that for big projects you might need lots of RAM to keep all the data in memory.

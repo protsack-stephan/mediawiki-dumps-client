@@ -26,7 +26,7 @@ func createClientTestServer() http.Handler {
 
 	path := fmt.Sprintf(pageTitlesTestFile, pageTitleTestDate)
 	router.HandleFunc(pageTitlesTestURL+"/"+pageTitleTestDate+"/"+path, func(w http.ResponseWriter, r *http.Request) {
-		content, err := ioutil.ReadFile("./stub/" + path)
+		content, err := ioutil.ReadFile("./testdata/" + path)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
