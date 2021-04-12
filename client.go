@@ -11,9 +11,28 @@ import (
 	"time"
 )
 
-// PageTitles get list of page titles for project
+const dumpsURL = "https://dumps.wikimedia.org/"
+const dateFormat = "20060102"
+
+// NewClient create new dumps client
+func NewClient() *Client {
+	return &Client{
+		dumpsURL,
+		new(http.Client),
+		newOptions(),
+	}
+}
+
+// Client for dumps download
+type Client struct {
+	url        string
+	httpClient *http.Client
+	options    *Options
+}
+
+// PageTitles get list of page titles for project in ns 0 (daily)
 func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time) ([]string, error) {
-	url := cl.url + cl.options.PageTitlesURL + "/" + date.Format(dateFormat) + "/" + dbName + "-" + date.Format(dateFormat) + "-all-titles-in-ns-0.gz"
+	url := fmt.Sprintf("%s%s/%s/%s-%s-all-titles-in-ns-0.gz", cl.url, cl.options.PageTitlesURL, date.Format(dateFormat), dbName, date.Format(dateFormat))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 	if err != nil {
