@@ -30,23 +30,33 @@ type Client struct {
 	options    *Options
 }
 
-// PageTitles get list of page titles for project in ns 0 (daily)
-func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time, cb func(p *Page)) error {
-	url := fmt.Sprintf("%s%s/%s/%s-%s-all-titles-in-ns-0.gz", cl.url, cl.options.PageTitlesURL, date.Format(dateFormat), dbName, date.Format(dateFormat))
+func (cl *Client) req(ctx context.Context, url string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res, err := cl.httpClient.Do(req)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("req status '%d'", res.StatusCode)
+		return nil, fmt.Errorf("status code: '%d'", res.StatusCode)
+	}
+
+	return res, nil
+}
+
+// PageTitles get list of page titles for project in ns 0 (daily)
+func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time, cb func(p *Page)) error {
+	url := fmt.Sprintf("%s%s/%s/%s-%s-all-titles-in-ns-0.gz", cl.url, cl.options.PageTitlesURL, date.Format(dateFormat), dbName, date.Format(dateFormat))
+	res, err := cl.req(ctx, url)
+
+	if err != nil {
+		return err
 	}
 
 	defer res.Body.Close()
@@ -77,24 +87,13 @@ func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time,
 // PageTitelsNs monthly dump of page titles in all namespaces
 func (cl *Client) PageTitlesNs(ctx context.Context, dbName string, date time.Time, cb func(*Page)) error {
 	url := fmt.Sprintf("%s%s/%s/%s/%s-%s-all-titles.gz", cl.url, cl.options.PageTitlesNsURL, dbName, date.Format(dateFormat), dbName, date.Format(dateFormat))
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	res, err := cl.req(ctx, url)
 
 	if err != nil {
 		return err
-	}
-
-	res, err := cl.httpClient.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("req status '%d'", res.StatusCode)
 	}
 
 	defer res.Body.Close()
-
 	br := bufio.NewReader(res.Body)
 	gzr, err := gzip.NewReader(br)
 
