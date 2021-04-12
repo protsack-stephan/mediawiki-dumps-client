@@ -57,8 +57,11 @@ func TestClient(t *testing.T) {
 		client := NewClient()
 		client.url = srv.URL
 		client.options.PageTitlesURL = pageTitlesTestURL
+		titles := map[string]*Page{}
 
-		titles, err := client.PageTitles(context.Background(), pageTitlesTestDBName, pageTitlesTestDate)
+		err := client.PageTitles(context.Background(), pageTitlesTestDBName, pageTitlesTestDate, func(p *Page) {
+			titles[p.Title] = p
+		})
 		assert.NoError(err)
 		assert.NotNil(titles)
 
@@ -74,11 +77,14 @@ func TestClient(t *testing.T) {
 		client := NewClient()
 		client.url = srv.URL
 		client.options.PageTitlesURL = pageTitlesTestURL
+		titles := []*Page{}
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*1)
 		defer cancel()
 
-		titles, err := client.PageTitles(ctx, pageTitlesTestDBName, pageTitlesTestDate)
+		err := client.PageTitles(ctx, pageTitlesTestDBName, pageTitlesTestDate, func(p *Page) {
+			titles = append(titles, p)
+		})
 		assert.Contains(err.Error(), context.DeadlineExceeded.Error())
 		assert.Equal(0, len(titles))
 	})
