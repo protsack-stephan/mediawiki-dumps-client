@@ -110,7 +110,7 @@ func TestClient(t *testing.T) {
 		}
 	})
 
-	t.Run("page titles error", func(t *testing.T) {
+	t.Run("page titles ns error", func(t *testing.T) {
 		client := NewClient()
 		client.url = srv.URL
 		client.options.PageTitlesNsURL = clientTestPageTitlesNsURL
