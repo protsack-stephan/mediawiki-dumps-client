@@ -13,11 +13,13 @@ import (
 )
 
 var clientTestTitles = []string{"🏳️‍🌈", "🏀", "🥊"}
+var clientTestNsTitles = []string{"Discusión:🏳️‍🌈", "Usuario:🏀", "Usuario_discusión:🥊"}
 var clientTestDate = time.Date(2020, 9, 1, 0, 0, 0, 0, time.UTC)
 
 const clientTestDateFormat = "20060102"
 const clientTestPageTitleURL = "/pagetitles"
 const clientTestPageTitlesNsURL = "/alltitles"
+const clientTestNamespacesURL = "/namespaces"
 const clientTestDbName = "test"
 
 func createClientTestServer() http.Handler {
@@ -37,6 +39,17 @@ func createClientTestServer() http.Handler {
 	allTitles := fmt.Sprintf("test-%s-all-titles.gz", clientTestDate.Format(clientTestDateFormat))
 	router.HandleFunc(fmt.Sprintf("%s/%s/%s/%s", clientTestPageTitlesNsURL, clientTestDbName, clientTestDate.Format(clientTestDateFormat), allTitles), func(w http.ResponseWriter, r *http.Request) {
 		content, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s", allTitles))
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			_, _ = w.Write(content)
+		}
+	})
+
+	namespaces := fmt.Sprintf("test-%s-siteinfo-namespaces.json.gz", clientTestDate.Format(clientTestDateFormat))
+	router.HandleFunc(fmt.Sprintf("%s/%s/%s/%s", clientTestNamespacesURL, clientTestDbName, clientTestDate.Format(clientTestDateFormat), namespaces), func(w http.ResponseWriter, r *http.Request) {
+		content, err := ioutil.ReadFile(fmt.Sprintf("./testdata/%s", namespaces))
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -98,6 +111,7 @@ func TestClient(t *testing.T) {
 		client := NewClient()
 		client.url = srv.URL
 		client.options.PageTitlesNsURL = clientTestPageTitlesNsURL
+		client.options.NamespacesURL = clientTestNamespacesURL
 		titles := map[string]*Page{}
 
 		err := client.PageTitlesNs(context.Background(), clientTestDbName, clientTestDate, func(p *Page) {
@@ -105,7 +119,7 @@ func TestClient(t *testing.T) {
 		})
 		assert.NoError(err)
 
-		for _, title := range clientTestTitles {
+		for _, title := range clientTestNsTitles {
 			assert.Contains(titles, title)
 		}
 	})
@@ -114,13 +128,14 @@ func TestClient(t *testing.T) {
 		client := NewClient()
 		client.url = srv.URL
 		client.options.PageTitlesNsURL = clientTestPageTitlesNsURL
-		titles := []*Page{}
+		client.options.NamespacesURL = clientTestNamespacesURL
+		titles := map[string]*Page{}
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*1)
 		defer cancel()
 
 		err := client.PageTitlesNs(ctx, clientTestDbName, clientTestDate, func(p *Page) {
-			titles = append(titles, p)
+			titles[p.Title] = p
 		})
 		assert.Contains(err.Error(), context.DeadlineExceeded.Error())
 		assert.Equal(0, len(titles))

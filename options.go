@@ -2,12 +2,14 @@ package dumps
 
 const pageTitlesURL = "/other/pagetitles/"
 const pageTitlesNsURL = ""
+const namespacesURL = ""
 
 // newOptions create new options struct
 func newOptions() *Options {
 	return &Options{
 		pageTitlesURL,
 		pageTitlesNsURL,
+		namespacesURL,
 	}
 }
 
@@ -15,4 +17,5 @@ func newOptions() *Options {
 type Options struct {
 	PageTitlesURL   string
 	PageTitlesNsURL string
+	NamespacesURL   string
 }
