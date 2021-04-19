@@ -4,11 +4,19 @@ This is golang client for accessing Mediawiki API dumps [https://dumps.wikimedia
 
 Small example of titles for English Wikinews:
 ```go
-client := dumps.NewCLient()
+client := dumps.NewClient()
 
-titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC())
+_ = client.PageTitles(context.Background(), "enwikinews", time.Now().UTC(), func(p *dumps.Page) {
+	fmt.Println(p)
+})
 
-fmt.Println(titles, err)
+date := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
+
+_ = client.PageTitlesNs(context.Background(), "enwikinews", date, func(p *dumps.Page) {
+	if p.Ns == 6 {
+		fmt.Println(p)
+	}
+})
 ```
 
 If you need to change the default configuration you can use client builder:
@@ -19,9 +27,13 @@ client := dumps.NewBuilder().
 		Options(&dumps.Options{}).
 		Build()
 
-titles, err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC())
+date := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
 
-fmt.Println(titles, err)
+_ = client.PageTitlesNs(context.Background(), "enwikinews", date, func(p *dumps.Page) {
+	if p.Ns == 6 {
+		fmt.Println(p)
+	}
+})
 ```
 
 ### Note that for big projects you might need lots of RAM to keep all the data in memory.
