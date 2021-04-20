@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -12,20 +11,31 @@ import (
 func main() {
 	client := dumps.NewClient()
 
-	_ = client.PageTitles(context.Background(), "enwikinews", time.Now().UTC(), func(p *dumps.Page) {
-		fmt.Println(p)
+	err := client.PageTitles(context.Background(), "enwikinews", time.Now().UTC(), func(p *dumps.Page) {
+		log.Println(p)
 	})
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	date := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	ns, _ := client.Namespaces(context.Background(), "ukwikinews", date)
-	fmt.Println(ns)
+	ns, err := client.Namespaces(context.Background(), "ukwikinews", date)
 
-	err := client.PageTitlesNs(context.Background(), "ukwikinews", date, func(p *dumps.Page) {
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(ns)
+	}
+
+	err = client.PageTitlesNs(context.Background(), "ukwikinews", date, func(p *dumps.Page) {
 		if p.Ns == 0 {
-			fmt.Println(p)
+			log.Println(p)
 		}
 	})
 
-	log.Println(err)
+	if err != nil {
+		log.Println(err)
+	}
 }
