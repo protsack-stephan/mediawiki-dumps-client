@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -84,8 +85,40 @@ func (cl *Client) PageTitles(ctx context.Context, dbName string, date time.Time,
 	return scn.Err()
 }
 
+// Namespaces get monthly namespaces dump
+func (cl *Client) Namespaces(ctx context.Context, dbName string, date time.Time) (map[int]Namespace, error) {
+	ns := new(namespacesResponse)
+	url := fmt.Sprintf("%s%s/%s/%s/%s-%s-siteinfo-namespaces.json.gz", cl.url, cl.options.NamespacesURL, dbName, date.Format(dateFormat), dbName, date.Format(dateFormat))
+	res, err := cl.req(ctx, url)
+
+	if err != nil {
+		return ns.Query.Namespaces, err
+	}
+
+	defer res.Body.Close()
+	gzr, err := gzip.NewReader(res.Body)
+
+	if err != nil {
+		return ns.Query.Namespaces, err
+	}
+
+	defer gzr.Close()
+
+	if err := json.NewDecoder(gzr).Decode(ns); err != nil {
+		return ns.Query.Namespaces, err
+	}
+
+	return ns.Query.Namespaces, nil
+}
+
 // PageTitelsNs monthly dump of page titles in all namespaces
 func (cl *Client) PageTitlesNs(ctx context.Context, dbName string, date time.Time, cb func(*Page)) error {
+	nspaces, err := cl.Namespaces(ctx, dbName, date)
+
+	if err != nil {
+		return err
+	}
+
 	url := fmt.Sprintf("%s%s/%s/%s/%s-%s-all-titles.gz", cl.url, cl.options.PageTitlesNsURL, dbName, date.Format(dateFormat), dbName, date.Format(dateFormat))
 	res, err := cl.req(ctx, url)
 
@@ -94,12 +127,13 @@ func (cl *Client) PageTitlesNs(ctx context.Context, dbName string, date time.Tim
 	}
 
 	defer res.Body.Close()
-	br := bufio.NewReader(res.Body)
-	gzr, err := gzip.NewReader(br)
+	gzr, err := gzip.NewReader(res.Body)
 
 	if err != nil {
 		return err
 	}
+
+	defer gzr.Close()
 
 	scn := bufio.NewScanner(gzr)
 	scn.Scan()
@@ -114,8 +148,16 @@ func (cl *Client) PageTitlesNs(ctx context.Context, dbName string, date time.Tim
 				return fmt.Errorf("title: %s, err: %v", fields[1], err)
 			}
 
+			title := fields[1]
+
+			if ns != 0 {
+				if prefix, ok := nspaces[ns]; ok {
+					title = fmt.Sprintf("%s:%s", strings.Replace(prefix.Local, " ", "_", -1), title)
+				}
+			}
+
 			cb(&Page{
-				fields[1],
+				title,
 				ns,
 			})
 		}
