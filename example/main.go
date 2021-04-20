@@ -22,7 +22,7 @@ func main() {
 	fmt.Println(ns)
 
 	err := client.PageTitlesNs(context.Background(), "ukwikinews", date, func(p *dumps.Page) {
-		if p.Ns == 5 {
+		if p.Ns == 0 {
 			fmt.Println(p)
 		}
 	})

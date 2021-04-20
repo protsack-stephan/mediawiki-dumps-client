@@ -140,4 +140,27 @@ func TestClient(t *testing.T) {
 		assert.Contains(err.Error(), context.DeadlineExceeded.Error())
 		assert.Equal(0, len(titles))
 	})
+
+	t.Run("namespaces success", func(t *testing.T) {
+		client := NewClient()
+		client.url = srv.URL
+		client.options.NamespacesURL = clientTestNamespacesURL
+
+		ns, err := client.Namespaces(context.Background(), clientTestDbName, clientTestDate)
+		assert.NoError(err)
+		assert.NotZero(ns)
+	})
+
+	t.Run("namespaces error", func(t *testing.T) {
+		client := NewClient()
+		client.url = srv.URL
+		client.options.NamespacesURL = clientTestNamespacesURL
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*1)
+		defer cancel()
+
+		ns, err := client.Namespaces(ctx, clientTestDbName, clientTestDate)
+		assert.Contains(err.Error(), context.DeadlineExceeded.Error())
+		assert.Zero(ns)
+	})
 }
